@@ -1,0 +1,31 @@
+$Prendi il LHE file
+sed -i '/<header>/r MGParamCMS.txt' filename.lhe 
+
+#./step0_LHEtoGEN.sh      => LHEtoGEN_cfg.py
+#./step1_GENtoSIM.sh      => GENtoSIM_cfg.py
+#./step2_SIMtoMINIAOD.sh  => SIMtoMINI_step1_cfg.py, SIMtoMINI_step2_cfg.py, SIMtoMINI_step3_cfg.py
+
+#Modify cfg with the needed parameters:
+
+##GENtoSIM_cfg.py
+process.maxEvents
+    input = cms.untracked.int32(XXX_MAXEVENTS_XXX)
+process.source    
+    fileNames = cms.untracked.vstring('file:/home/llr/cms/ortona/diHiggs/LHEtoMINIAOD/lambda20_GEN.root'),
+    skipEvents=cms.untracked.uint32(XXX_SKIPEVENTS_XXX)
+process.RAWSIMoutput
+    fileName = cms.untracked.string('file:XXX_OUTPUTFILE_XXX'),
+
+##SIMtoMINI_step1_cfg.py and SIMtoMINI_step2_cfg.py
+#maxevents fixed at -1, do not skip events
+process.source    
+    fileNames = cms.untracked.vstring('XXX_SAMPLEFILENAME_XXX')
+process.RAWSIMoutput
+    fileName = cms.untracked.string('file:XXX_OUTPUTFILE_XXX'),
+    
+    
+#LAUNCH
+python submitOnTier3_LLRHTauTau.py -o "/data_CMS/cms/ortona/Lambda20_step0/" -m 300000 -n 300 -c GENtoSIM_cfg.py
+python submitOnTier3_LLRHTauTau.py -o "/data_CMS/cms/ortona/Lambda20_step1/" -s "/data_CMS/cms/ortona/Lambda20_step0/miniAOD__300000Events_0Skipped_1425481066.66/" -m 300000 -n 300 -t "lambda20" -c SIMtoMINI_step1_cfg.py
+python submitOnTier3_LLRHTauTau.py -o "/data_CMS/cms/ortona/Lambda20_step2/" -s "/data_CMS/cms/ortona/Lambda20_step1/test3_lambda20_miniAOD__200Events_0Skipped_1425474789.42/" -m 200 -n 20 -t "lambda20" -c SIMtoMINI_step2_cfg.py
+python submitOnTier3_LLRHTauTau.py -o "/data_CMS/cms/ortona/Lambda20_step3/" -s "/data_CMS/cms/ortona/Lambda20_step2/test3_lambda20_miniAOD__200Events_0Skipped_1425477485.43/" -m 200 -n 20 -t "lambda20" -c SIMtoMINI_step3_cfg.py
