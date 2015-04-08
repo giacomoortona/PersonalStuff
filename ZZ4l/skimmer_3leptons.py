@@ -94,17 +94,17 @@ process.goodPrimaryVertices = cms.EDFilter("VertexSelector",
 
 
 
-#process.muons = cms.EDFilter("PATMuonRefSelector",
-#    src = cms.InputTag("slimmedMuons"),
-#    cut = cms.string("")
-#                             )
+process.muons = cms.EDFilter("PATMuonRefSelector",
+    src = cms.InputTag("slimmedMuons"),
+    cut = cms.string("pt>5 && (isGlobalMuon || (isTrackerMuon && numberOfMatches>0)) && muonBestTrackType!=2")
+                             )
 #
-#process.electrons = cms.EDFilter("PATElectronRefSelector",
-#   src = cms.InputTag("slimmedElectrons"),
-#   cut = cms.string("")#pt>7 && abs(eta)<2.5 &&" +
-#   #                 "gsfTrack.hitPattern().numberOfHits(HitPattern::MISSING_INNER_HITS)<=1"
-#   #                 )
-#   )
+process.electrons = cms.EDFilter("PATElectronRefSelector",
+   src = cms.InputTag("slimmedElectrons"),
+   cut = cms.string("pt>7")#pt>7 && abs(eta)<2.5 &&" +
+   #                 "gsfTrack.hitPattern().numberOfHits(HitPattern::MISSING_INNER_HITS)<=1"
+   #                 )
+   )
 
 # All leptons, any F/C.
 # CAVEAT: merging creates copies of the objects, so that CandViewShallowCloneCombiner is not able to find 
@@ -140,13 +140,13 @@ process.goodPrimaryVertices = cms.EDFilter("VertexSelector",
 #)
 
 process.leptons = cms.EDProducer("CandViewMerger",
- src = cms.VInputTag(cms.InputTag("slimmedMuons"), cms.InputTag("slimmedElectrons"))
+ src = cms.VInputTag(cms.InputTag("muons"), cms.InputTag("electrons"))
 )
 
-process.bestleptons = cms.EDFilter("PtMinCandViewSelector",
-  src = cms.InputTag("leptons"),
-  ptMin = cms.double(4)
-)
+#process.bestleptons = cms.EDFilter("PtMinCandViewSelector",
+#  src = cms.InputTag("leptons"),
+#  ptMin = cms.double(4)
+#)
 
 
 # The actual filter
@@ -181,7 +181,10 @@ process.hltFilter = hlt.hltHighLevel.clone(
 # Prepare lepton collections
 process.HZZSkimminiAOD = cms.Path(
        process.hltFilter + process.goodPrimaryVertices +
-       process.leptons   + process.bestleptons + process.HzzSkim
+       process.muons     + process.electrons +
+       process.leptons   + 
+       #process.bestleptons + 
+       process.HzzSkim
     )
 
 #process.SkimSequence = cms.Sequence(process.HZZSkimminiAOD)
