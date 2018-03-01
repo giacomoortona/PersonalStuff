@@ -16,6 +16,7 @@ def parseOptions():
     parser.add_option('-t', '--tipo', dest='tipo', type='string', default="hmaa_mhh", help='')
     parser.add_option('-u', '--unfold', dest='unfold', type='int', default=0, help='unfold (1) or not (0)')
     parser.add_option('-p', '--non-parametric', action="store_false", dest='parametric', default=True, help='use morphing instead of parametric')
+    parser.add_option('-k', '--constant-lambda', action="store_true", dest='constlambda', default=False, help='use constant lambda for mhh shape')
     #parser.add_option('-s', '--stop', dest='stop', type='int', default=1, help='stop to see the plot')
     global opt, args
     (opt, args) = parser.parse_args()
@@ -82,16 +83,23 @@ lambdas = [1.00]
 
 if opt.tipo == "boosted" : 
 	processes = ["HH","QCD","data_obs"]
-	lambdas = [1.0,0.5,0.9,0.95,1.05,1.1,1.5]
+	#lambdas = [1.0,0.5,0.9,0.95,1.05,1.1,1.5]
 
-x = RooRealVar("x","x",120,130) #maa
+#if opt.tipo == "hh_m" :
+#	x = RooRealVar("x","x",240,1500) #mhh
+#	x.setBins(50)
+#else:	
+x = RooRealVar("x","x",115,135) #maa
 x.setBins(50)
 if tipo == "hmaa_mbb" :
 	y = RooRealVar("y","y",80,140) #mbb
-	y.setBins(50)	
+	y.setBins(50)		
 elif opt.tipo == "boosted" :
 	y = RooRealVar("y","y",220,2500) #mHH
 	y.setBins(57)
+elif tipo == "haa_m" :
+	y = RooRealVar("y","y",115,135) #maa
+	y.setBins(50)
 else :
 	y = RooRealVar("y","y",240,1500) #mHH
 	y.setBins(75)
@@ -115,17 +123,18 @@ meanG.setConstant()
 smearPhoton.setConstant()
 gauss = RooGaussian("gauss","gaussian PDF",x,meanG,sigmaG) 
 #These values should be retuned for Boosted analysis
-constL = RooFormulaVar("constL","0.0437283+@0*1.34435-@0*@0*0.695253",RooArgList(kl)) 
-meanL = RooFormulaVar("meanL","421.557+@0*25.7048",RooArgList(kl)) 
-sigmaL= RooFormulaVar("sigmaL","135.194-@0*151.369+@0*@0*77.4694",RooArgList(kl)) 
-expoC= RooFormulaVar("expoC","-0.00585114+@0*0.000626062",RooArgList(kl)) 
-changer= RooFormulaVar("changer","615.666+@0*77.17",RooArgList(kl)) 
-#We can fix he shape once for all, in any case the differences are mostly statistics
-#			constL = RooFormulaVar("constL","0.0437283+@0*1.34435-@0*@0*0.695253",RooArgList(klConst)) 
-#			meanL = RooFormulaVar("meanL","421.557+@0*25.7048",RooArgList(klConst)) 
-#			sigmaL= RooFormulaVar("sigmaL","135.194-@0*151.369+@0*@0*77.4694",RooArgList(klConst)) 
-#			expoC= RooFormulaVar("expoC","-0.00585114+@0*0.000626062",RooArgList(klConst)) 
-#			changer= RooFormulaVar("changer","615.666+@0*77.17",RooArgList(klConst)) 
+if not opt.constlambda :
+	constL = RooFormulaVar("constL","0.0437283+@0*1.34435-@0*@0*0.695253",RooArgList(kl)) 
+	meanL = RooFormulaVar("meanL","421.557+@0*25.7048",RooArgList(kl)) 
+	sigmaL= RooFormulaVar("sigmaL","135.194-@0*151.369+@0*@0*77.4694",RooArgList(kl)) 
+	expoC= RooFormulaVar("expoC","-0.00585114+@0*0.000626062",RooArgList(kl)) 
+	changer= RooFormulaVar("changer","615.666+@0*77.17",RooArgList(kl)) 
+else :
+	constL = RooFormulaVar("constL","0.0437283+@0*1.34435-@0*@0*0.695253",RooArgList(klConst)) 
+	meanL = RooFormulaVar("meanL","421.557+@0*25.7048",RooArgList(klConst)) 
+	sigmaL= RooFormulaVar("sigmaL","135.194-@0*151.369+@0*@0*77.4694",RooArgList(klConst)) 
+	expoC= RooFormulaVar("expoC","-0.00585114+@0*0.000626062",RooArgList(klConst)) 
+	changer= RooFormulaVar("changer","615.666+@0*77.17",RooArgList(klConst)) 
 landau = LandauExp("LandauExp","LandauExp",y,constL,meanL,sigmaL,expoC,changer)
 
 for klambda in lambdas :
@@ -148,11 +157,11 @@ for klambda in lambdas :
 			allPdfs.append(pdf) 
 			if "boosted" in opt.tipo : rates.append(11639.5)
 			else :rates.append(10211.10624)
-			wFunc = RooRealVar ("weight","event weight",1) 
-			tempdata = pdf.generate(RooArgSet(x,y),5009.4*1-15732*1+20938)
-			datasets.append(tempdata)
-			wFunc = RooRealVar ("weight","event weight",1) 
-			tempdata.addColumn(wFunc)
+			#wFunc = RooRealVar ("weight","event weight",1) 
+			#tempdata = pdf.generate(RooArgSet(x,y),5009.4*1-15732*1+20938)
+			#datasets.append(tempdata)
+			#wFunc = RooRealVar ("weight","event weight",1) 
+			#tempdata.addColumn(wFunc)
 			#	RooDataSet (const char *name, const char *title, RooDataSet *data, const RooArgSet &vars, const char *cuts=0, const char *wgtVarName=0)
 			#datasets.append(RooDataSet(tempdata.GetName(),tempdata.GetTitle(),tempdata,RooArgSet(x,y,wFunc),"True",wFunc.GetName()))
 			#datasets.append()
@@ -181,12 +190,16 @@ for klambda in lambdas :
 			print h.Integral(), 30000000.0*h.Integral()
 	 		h.Scale(30000000.0)
 	 		print h.Integral()
-			rates.append(h.Integral())
+			#if tipo == "haa_m" : rates.append(h.Integral(h.FindBin(120),h.FindBin(130)))
+			if opt.tipo == "hh_m" : rates.append(h.Integral(h.FindBin(240),h.FindBin(1500)))
+			else : rates.append(h.Integral())
 			#htoappend = h.Rebin(4*dim)
 			for xbin in range(1,h.GetNbinsX()+1) :
 	 			if h.GetBinContent(xbin)==0 : h.SetBinContent(xbin,0.001)	
 			histos.append(h)
+			#print "Normalizations", h.Integral(), h.Integral(h.FindBin(120),h.FindBin(130))
 			rdh = RooDataHist(iproc+"rdh",iproc+"rdh",varList,h)
+			#print "Normalizations", rdh.sumEntries(), h.Integral(), h.Integral(h.FindBin(120),h.FindBin(130))
 			if not "obs" in iproc : 
 				if "HH" in iproc and tipo == "hmaa_mbb" and opt.parametric :
 					#qui fare la conditional rooprodpdf
@@ -220,13 +233,14 @@ for klambda in lambdas :
 				#print pdf.sumEntries()
 				#pdf.Print()
 				pdf = rdh
+				print "Normalizations", rdh.sumEntries(), h.Integral()
 				pdf.SetNameTitle("data_obs","data_obs")
 				pdf.SetName("data_obs")
 				pdf.SetTitle("data_obs")
 				#pdf = datasetFull
 		getattr(ws,'import')(pdf,RooFit.RecycleConflictNodes())
 		if opt.tipo == "boosted" :
-			rfvSigRate_HH = RooFormulaVar("HH_norm","-0.4875*@0 + 1,4883",RooArgList(kl))
+			rfvSigRate_HH = RooFormulaVar("HH_norm","-0.4875*@0 + 1.4883",RooArgList(kl))
 		else :
 			rfvSigRate_HH = RooFormulaVar("HH_norm","1.6096-0.6081*@0",RooArgList(kl))
 		getattr(ws,'import')(rfvSigRate_HH,RooFit.RecycleConflictNodes())
@@ -237,8 +251,9 @@ for klambda in lambdas :
 	#obs.SetTitle("data_obs")
 	#ws.writeToFile("hhbbaa/root_HH_kappa_l_{0:.2f}/ws.root".format(klambda))
 	outFile.write("imax 1\n")
-	outFile.write("jmax 3\n")
-	outFile.write("kmax 1\n")
+	if opt.tipo == "boosted" :outFile.write("jmax 1\n")
+	else: outFile.write("jmax 3\n")
+	outFile.write("kmax *\n")
 	outFile.write("----------------------\n")
 	#outFile.write("shapes * * {1}/root_HH_kappa_l_{0:.2f}/ws.root $PROCESS \n".format(klambda,folder))
 	outFile.write("shapes * * ws1.root w:$PROCESS \n".format(klambda,folder))
