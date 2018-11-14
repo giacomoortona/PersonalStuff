@@ -1,0 +1,37 @@
+
+#./step0_LHEtoGEN.sh      => con gridPack_to_miniaod_cfg_LHE_GEN.py
+#./step1_GENtoSIM.sh      => GENtoSIM_cfg.py
+#./step2_SIMtoMINIAOD.sh  => SIMtoMINI_step1_cfg.py, SIMtoMINI_step2_cfg.py, SIMtoMINI_step3_cfg.py
+
+#Modify cfg with the needed parameters:
+
+##GENtoSIM_cfg.py
+process.maxEvents
+    input = cms.untracked.int32(XXX_MAXEVENTS_XXX)
+process.source    
+    fileNames = cms.untracked.vstring('file:/home/llr/cms/ortona/diHiggs/LHEtoMINIAOD/lambda20_GEN.root'),
+    skipEvents=cms.untracked.uint32(XXX_SKIPEVENTS_XXX)
+process.RAWSIMoutput
+    fileName = cms.untracked.string('file:XXX_OUTPUTFILE_XXX'),
+
+##SIMtoMINI_step1_cfg.py and SIMtoMINI_step2_cfg.py and SIMtoMINI_step3_cfg.py
+#for step1 ONLY!!
+skipEvents=cms.untracked.uint32('XXX_SKIPSUBEVENTS_XXX'),
+# for the others maxevents fixed at -1, do not skip events
+process.source    
+    fileNames = cms.untracked.vstring('XXX_SAMPLEFILENAME_XXX')
+process.RAWSIMoutput
+    fileName = cms.untracked.string('file:XXX_OUTPUTFILE_XXX'),
+    
+    
+##LAUNCH
+#from LHE to GEN
+cmsRun LHEtoGEN_cfg.py
+#from GEN to SIM (long one!)
+python submitOnTier3_LLRHTauTau.py -o "/data_CMS/cms/ortona/Lambda20_step0/" -m 300000 -n 300 -c GENtoSIM_cfg.py
+#from SIM to RAW-DR
+python submitOnTier3_LLRHTauTau.py -o "/data_CMS/cms/ortona/Lambda20_step1/" -s "/data_CMS/cms/ortona/Lambda20_step0/miniAOD__300000Events_0Skipped_1425481066.66/" -m 300000 -n 2400 -a 1 -t "lambda20_1"  -i 1000 -c SIMtoMINI_step1_cfg.py
+#from DR to AOD
+python submitOnTier3_LLRHTauTau.py -o "/data_CMS/cms/ortona/Lambda20_step2/" -s "/data_CMS/cms/ortona/Lambda20_step1/miniAOD_lambda20_300000Events_0Skipped_1425561001.52/" -m 300000 -n 300 -a 1 -t "lambda20_2" -c SIMtoMINI_step2_cfg.py
+#from AOD to miniAOD
+python submitOnTier3_LLRHTauTau.py -o "/data_CMS/cms/ortona/Lambda20_step3/" -s "/data_CMS/cms/ortona/Lambda20_step2/miniAOD_lambda20_2_300000Events_0Skipped_1425893836.86/" -m 300000 -n 300 -a 1 -t "lambda20_3" -c SIMtoMINI_step3_cfg.py

@@ -1,0 +1,4 @@
+#./step0_LHEtoGEN.sh      => cmsRun gridPack_to_miniaod_cfg_LHE_GEN.py
+#./step1_GENtoMiniAOD.sh  => lanciare launch_bbWW.sh, questo gira i cmsDriver per fare i vari step di produzione
+
+Bisogna solo capire come configurare grid/crab/queues or whatever...
