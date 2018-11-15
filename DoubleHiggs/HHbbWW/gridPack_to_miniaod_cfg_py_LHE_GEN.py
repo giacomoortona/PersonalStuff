@@ -126,7 +126,7 @@ for path in process.paths:
 
 # Customisation from command line
 
-# Add early deletion of temporary data products to reduce peak memory need
-from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
-process = customiseEarlyDelete(process)
+# Add early deletion of temporary data products to reduce peak memory need not yet available in 8_0_26
+#from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+#process = customiseEarlyDelete(process)
 # End adding early deletion
