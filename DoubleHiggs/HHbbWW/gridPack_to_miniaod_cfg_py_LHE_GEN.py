@@ -65,7 +65,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:mc', '')
 process.generator = cms.EDFilter("Pythia8HadronizerFilter",
     PythiaParameters = cms.PSet(
         parameterSets = cms.vstring('pythia8CommonSettings', 
-            'pythia8CP5Settings', 
+            #'pythia8CP5Settings', #only from MC2017
             'processParameters'),
         processParameters = cms.vstring('24:mMin = 0.05', 
             '24:onMode = on', 
@@ -77,7 +77,7 @@ process.generator = cms.EDFilter("Pythia8HadronizerFilter",
             'ResonanceDecayFilter:exclusive = on', 
             'ResonanceDecayFilter:eMuTauAsEquivalent = on', 
             'ResonanceDecayFilter:allNuAsEquivalent = on', 
-            'ResonanceDecayFilter:udscAsEquivalent = on', 
+            #'ResonanceDecayFilter:udscAsEquivalent = on', #only from MC2017
             'ResonanceDecayFilter:mothers = 24,25', 
             'ResonanceDecayFilter:daughters = 5,5,1,1,11,12'),
         pythia8CommonSettings = cms.vstring('Tune:preferLHAPDF = 2', 
