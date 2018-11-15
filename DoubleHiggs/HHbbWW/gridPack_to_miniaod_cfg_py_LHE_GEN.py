@@ -79,7 +79,7 @@ process.generator = cms.EDFilter("Pythia8HadronizerFilter",
             'ResonanceDecayFilter:allNuAsEquivalent = on', 
             #'ResonanceDecayFilter:udscAsEquivalent = on', #only from MC2017
             'ResonanceDecayFilter:mothers = 24,25', 
-            'ResonanceDecayFilter:daughters = 5,5,1,1,11,12'),
+            'ResonanceDecayFilter:daughters = 5,5,1,2,11,12'),
         pythia8CommonSettings = cms.vstring('Tune:preferLHAPDF = 2', 
             'Main:timesAllowErrors = 10000', 
             'Check:epTolErr = 0.01', 
